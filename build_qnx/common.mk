@@ -30,7 +30,7 @@ include $(MKFILES_ROOT)/qtargets.mk
 
 FAST-DDS_DIST_DIR = $(PROJECT_ROOT)/../
 
-ASIO_ROOT = $(PROJECT_ROOT)/../thirdparty/asio
+ASIO_ROOT = $(PROJECT_ROOT)/../thirdparty/asio/asio
 FOONATHAN_MEMORY_ROOT = $(PROJECT_ROOT)/../thirdparty/foonathan_memory_vendor
 FASTCDR_ROOT = $(PROJECT_ROOT)/../thirdparty/fastcdr
 GOOGLETEST_ROOT = $(PROJECT_ROOT)/../thirdparty/googletest
