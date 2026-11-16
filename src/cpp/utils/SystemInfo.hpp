@@ -31,18 +31,18 @@
 #include <fastdds/utils/IPFinder.hpp>
 #include <utils/Host.hpp>
 
-#if defined(_WIN32) || defined(__unix__)
+#if defined(_WIN32) || (defined(__unix__) && !defined(__QNXNTO__))
 #include <FileWatch.hpp>
-#endif // defined(_WIN32) || defined(__unix__)
+#endif
 
 namespace eprosima {
 
 using ReturnCode_t = eprosima::fastdds::dds::ReturnCode_t;
-#if defined(_WIN32) || defined(__unix__)
+#if defined(_WIN32) || (defined(__unix__) && !defined(__QNXNTO__))
 using FileWatchHandle = std::unique_ptr<filewatch::FileWatch<std::string>>;
 #else
 using FileWatchHandle = void*;
-#endif // defined(_WIN32) || defined(__unix__)
+#endif
 
 /**
  * This singleton serves as a centralized point from where to obtain platform dependent system information.

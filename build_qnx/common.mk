@@ -23,16 +23,17 @@ ALL_DEPENDENCIES = Fast-DDS_all
 .PHONY: Fast-DDS_all install check clean
 
 CFLAGS += $(FLAGS)
-LDFLAGS += -Wl,--build-id=md5
+LDFLAGS += -Wl,--build-id=md5 -lc++
+CFLAGS += $(FLAGS) -Wno-error=array-bounds
 
 include $(MKFILES_ROOT)/qtargets.mk
 
 FAST-DDS_DIST_DIR = $(PROJECT_ROOT)/../
 
-ASIO_ROOT = $(PROJECT_ROOT)/../thirdparty/asio/asio
-FOONATHAN_MEMORY_ROOT = $(PROJECT_ROOT)/../foonathan_memory_vendor
+ASIO_ROOT = $(PROJECT_ROOT)/../thirdparty/asio
+FOONATHAN_MEMORY_ROOT = $(PROJECT_ROOT)/../thirdparty/foonathan_memory_vendor
 FASTCDR_ROOT = $(PROJECT_ROOT)/../thirdparty/fastcdr
-GOOGLETEST_ROOT = $(PROJECT_ROOT)/../googletest
+GOOGLETEST_ROOT = $(PROJECT_ROOT)/../thirdparty/googletest
 TINYXML2_ROOT = $(PROJECT_ROOT)/../thirdparty/tinyxml2
 
 CMAKE_ARGS += -DBUILD_SHARED_LIBS=ON \
@@ -57,8 +58,12 @@ CMAKE_ARGS += -DBUILD_SHARED_LIBS=ON \
 FAST-DDS_CMAKE_ARGS = $(CMAKE_ARGS) \
                      -DQNX_INSTALL_ROOT=$(FAST-DDS_INSTALL_ROOT) \
                      -DSECURITY=ON \
-                     -DCOMPILE_EXAMPLES=OFF \
-                     -DEPROSIMA_BUILD_TESTS=OFF
+                     -DCOMPILE_EXAMPLES=ON \
+                     -DEPROSIMA_BUILD_TESTS=OFF \
+                     -DCMAKE_FIND_USE_PACKAGE_REGISTRY=FALSE \
+                     -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=TRUE \
+                     -Dfastcdr_DIR=$(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib/cmake/fastcdr \
+                     -Dfoonathan_memory_DIR=$(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib/foonathan_memory/cmake
 
 CONFIGURE_ASIO = $(ASIO_ROOT)/configure --exec-prefix $(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR) --prefix $(FAST-DDS_INSTALL_ROOT)
 
@@ -67,7 +72,10 @@ MAKE_ARGS_ASIO = CXX=$(QNX_HOST)/usr/bin/q++ CC=$(QNX_HOST)/usr/bin/qcc
 ifndef NO_TARGET_OVERRIDE
 dependencies:
 	@cd $(ASIO_ROOT) && aclocal && autoconf && automake --add-missing
-	@cd $(ASIO_ROOT) && $(CONFIGURE_ASIO) && JLEVEL=8 make VERBOSE=1 install $(MAKE_ARGS_ASIO)
+	@cd $(ASIO_ROOT) && $(CONFIGURE_ASIO) && \
+    JLEVEL=8 make VERBOSE=1 install-recursive \
+    SUBDIRS="include" \
+    $(MAKE_ARGS_ASIO)
 	@rm -rf $(FAST-DDS_INSTALL_ROOT)/usr/include/asio $(FAST-DDS_INSTALL_ROOT)/usr/include/asio.hpp
 	@mkdir -p $(FAST-DDS_INSTALL_ROOT)/usr/include
 	@mv $(FAST-DDS_INSTALL_ROOT)/include/asio.hpp $(FAST-DDS_INSTALL_ROOT)/usr/include
@@ -79,20 +87,25 @@ dependencies:
 	@cd build/build_fastcdr && JLEVEL=8 make VERBOSE=1 install
 
 	@mkdir -p build/build_foonathan_memory
-	@cd build/build_foonathan_memory && cmake $(CMAKE_ARGS) $(FOONATHAN_MEMORY_ROOT)
+	@cd build/build_foonathan_memory && \
+cmake $(CMAKE_ARGS) \
+    -DFOONATHAN_MEMORY_FORCE_VENDORED_BUILD=ON \
+    $(FOONATHAN_MEMORY_ROOT)
 	@cd build/build_foonathan_memory && JLEVEL=8 make VERBOSE=1 all
 	@cd build/build_foonathan_memory && JLEVEL=8 make VERBOSE=1 install
 
-	@mkdir -p build/build_googletest
-	@cd build/build_googletest && cmake $(CMAKE_ARGS) $(GOOGLETEST_ROOT)
-	@cd build/build_googletest && JLEVEL=8 make VERBOSE=1 all
-	@cd build/build_googletest && JLEVEL=8 make VERBOSE=1 install
+# 	@mkdir -p build/build_googletest
+# 	@cd build/build_googletest && cmake $(CMAKE_ARGS) $(GOOGLETEST_ROOT)
+# 	@cd build/build_googletest && JLEVEL=8 make VERBOSE=1 all
+# 	@cd build/build_googletest && JLEVEL=8 make VERBOSE=1 install
 
 	@mkdir -p build/build_tinyxml2
 	@cd build/build_tinyxml2 && cmake $(CMAKE_ARGS) $(TINYXML2_ROOT)
 	@cd build/build_tinyxml2 && JLEVEL=8 make VERBOSE=1 all
 	@cd build/build_tinyxml2 && JLEVEL=8 make VERBOSE=1 install
-	@cp $(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib/cmake/tinyxml2/tinyxml2Config.cmake $(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib/cmake/tinyxml2/TinyXML2Config.cmake
+	@cp $(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib/cmake/tinyxml2/tinyxml2-config.cmake \
+    $(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib/cmake/tinyxml2/TinyXML2Config.cmake
+	#@cp $(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib/cmake/tinyxml2/tinyxml2Config.cmake $(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib/cmake/tinyxml2/TinyXML2Config.cmake
 
 Fast-DDS_all: dependencies
 	@mkdir -p build/build_fast-dds
