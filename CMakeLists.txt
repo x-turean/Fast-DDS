@@ -72,7 +72,13 @@ if(MSVC OR MSVC_IDE)
 else()
     # Add some generic warnings common to all compilers
     set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -Wall -Wpedantic -Wextra -Wno-unknown-pragmas -Wno-error=deprecated-declarations -Wno-switch-bool")
+        "${CMAKE_CXX_FLAGS} -Wall -Wpedantic -Wextra \
+            -Wno-unknown-pragmas \
+            -Wno-error=deprecated-declarations \
+            -Wno-error=array-bounds \
+            -Wno-switch-bool \
+            -Wno-error=stringop-overflow \
+            -Wno-error=alloc-size-larger-than=")
     # Add compiler specific options
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-psabi")

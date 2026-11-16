@@ -53,7 +53,8 @@ CMAKE_ARGS += -DBUILD_SHARED_LIBS=ON \
              -DCMAKE_INSTALL_LIBDIR=$(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib \
              -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
              -DINCLUDE_INSTALL_DIR=$(FAST-DDS_INSTALL_ROOT)/usr/include \
-             -DLIB_INSTALL_DIR=$(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib
+             -DLIB_INSTALL_DIR=$(FAST-DDS_INSTALL_ROOT)/$(CPUVARDIR)/usr/lib \
+             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 FAST-DDS_CMAKE_ARGS = $(CMAKE_ARGS) \
                      -DQNX_INSTALL_ROOT=$(FAST-DDS_INSTALL_ROOT) \
@@ -90,6 +91,7 @@ dependencies:
 	@cd build/build_foonathan_memory && \
 cmake $(CMAKE_ARGS) \
     -DFOONATHAN_MEMORY_FORCE_VENDORED_BUILD=ON \
+    -DBUILD_MEMORY_TOOLS=OFF \
     $(FOONATHAN_MEMORY_ROOT)
 	@cd build/build_foonathan_memory && JLEVEL=8 make VERBOSE=1 all
 	@cd build/build_foonathan_memory && JLEVEL=8 make VERBOSE=1 install
